@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GrassToucherCounter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fredoka:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e9f1dc;--ink:#14301c;--soft:#4d6b50;--card:#fbfdf6;--line:#b9d09f;--grass:#2f8f3a;--sun:#f2c94c;--err:#a8321f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1c12;--ink:#e6f2d8;--soft:#9ab88f;--card:#17291b;--line:#2d4a33;--grass:#6fcf6f;--sun:#f2c94c;--err:#ff8a73}}
+:root[data-theme="dark"]{--bg:#0f1c12;--ink:#e6f2d8;--soft:#9ab88f;--card:#17291b;--line:#2d4a33;--grass:#6fcf6f;--sun:#f2c94c;--err:#ff8a73}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Fredoka,ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold",system-ui,sans-serif}
+h1,h2{font-family:"Bagel Fat One",ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",sans-serif;font-weight:400;letter-spacing:.01em}
+h1{text-shadow:0 4px 0 rgba(47,143,58,.35),0 10px 18px rgba(20,48,28,.12)}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:clamp(2.6rem,11vw,5rem);line-height:.95;margin:.2em 0 .15em;letter-spacing:.005em}
+h1 span{display:inline-block;transform-origin:50% 100%;animation:sway 3s ease-in-out infinite}
+h1 span:nth-child(2n){animation-delay:.3s}h1 span:nth-child(3n){animation-delay:.6s}
+@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.5deg)}}
+@media (prefers-reduced-motion:reduce){h1 span{animation:none}}
+.lede{color:var(--soft);max-width:34em;margin:0 0 24px}
+.drop{display:block;border:2px dashed var(--grass);border-radius:18px;background:var(--card);padding:34px 18px;text-align:center;cursor:pointer}
+.drop:focus-within,.drop.over{outline:3px solid var(--sun);outline-offset:2px}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop b{display:block;font-size:1.25rem}
+.drop small{color:var(--soft)}
+#preview{display:none;margin-top:16px}
+#preview img{width:100%;max-height:360px;object-fit:cover;border-radius:14px;display:block}
+label.f{display:block;margin-top:12px;font-size:.95rem;color:var(--soft)}
+input[type=text]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);margin-top:4px}
+button{font:inherit;font-weight:bold;background:var(--grass);color:#fff;border:0;border-radius:999px;padding:12px 26px;margin-top:16px;cursor:pointer}
+:root[data-theme="dark"] button{color:#0f1c12}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button{color:#0f1c12}}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+#msg{min-height:1.5em;margin:10px 0 0;color:var(--err)}
+.count{display:flex;justify-content:space-between;align-items:baseline;margin:40px 0 12px;border-top:1px solid var(--line);padding-top:16px}
+.count h2{margin:0;font-size:1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+figure img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+figcaption{padding:10px 12px;font-size:.92rem}
+figcaption em{display:block;color:var(--soft);font-size:.82rem}
+.empty{color:var(--soft);padding:20px 0}
+main{padding-bottom:150px;position:relative;z-index:1}
+body{background:linear-gradient(var(--sky,#cfe8f5) 0,var(--bg) 420px) no-repeat,var(--bg)}
+:root{--sky:#cfe8f5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky:#12303f}}
+:root[data-theme="dark"]{--sky:#12303f}
+.sun{position:absolute;top:18px;right:6vw;width:70px;height:70px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 14px rgba(242,201,76,.28),0 0 60px 20px rgba(242,201,76,.45);animation:glow 4s ease-in-out infinite;z-index:0}
+.cloud{position:absolute;top:60px;left:-120px;width:110px;height:34px;border-radius:40px;background:#fff;opacity:.75;box-shadow:30px -14px 0 4px #fff,60px 2px 0 -2px #fff;animation:drift 38s linear infinite;z-index:0}
+.cloud.c2{top:130px;animation-duration:55s;animation-delay:-20s;transform:scale(.7)}
+@keyframes glow{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes drift{to{left:calc(100vw + 120px)}}
+#lawn{position:fixed;left:0;right:0;bottom:0;height:110px;pointer-events:none;z-index:5;display:flex;align-items:flex-end;padding-bottom:env(safe-area-inset-bottom,0px);background:linear-gradient(to top,#4aa83f 0,#4aa83f 10px,transparent 10px)}
+.b{flex:1;min-width:5px;margin:0 -1px;height:var(--h,50px);background:linear-gradient(to top,#4aa83f,var(--c,#9be26b));clip-path:polygon(0 100%,30% 45%,70% 0,100% 100%);transform-origin:50% 100%;animation:blade var(--d,3s) ease-in-out var(--dl,0s) infinite;will-change:rotate}
+@keyframes blade{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+.p{position:fixed;bottom:40px;width:10px;height:28px;background:linear-gradient(to top,#2f8f3a,#8be28b);clip-path:polygon(0 100%,50% 0,100% 100%);pointer-events:none;z-index:20;animation:burst var(--t,1.4s) cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes burst{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
+figure{animation:pop .55s cubic-bezier(.3,1.5,.5,1) both;transition:transform .25s}
+figure:hover{transform:translateY(-4px) rotate(-1deg)}
+@keyframes pop{from{opacity:0;transform:translateY(24px) scale(.85)}to{opacity:1;transform:none}}
+.drop{transition:transform .2s,background .2s}
+.drop:hover{transform:scale(1.015)}
+.drop b::before{content:"";display:block;width:76px;height:76px;margin:0 auto 6px;transform-origin:50% 100%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg stroke='%2314301c' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M32 56V33' stroke-width='8' fill='none'/%3E%3Cpath d='M32 56V33' stroke='%2362c84f' stroke-width='3.5' fill='none'/%3E%3Cpath d='M32 35C20 37 7 31 7 15C22 13 32 22 32 35Z' fill='%2362c84f'/%3E%3Cpath d='M32 35C32 18 42 5 58 7C61 24 49 37 32 35Z' fill='%2389e06a'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' opacity='.75'%3E%3Cpath d='M13 19C17 19 21 22 24 27'/%3E%3Cpath d='M44 13C48 12 52 13 54 16'/%3E%3C/g%3E%3Ccircle cx='8' cy='46' r='2.5' fill='%23f2c94c'/%3E%3Ccircle cx='57' cy='41' r='2.5' fill='%23f2c94c'/%3E%3Ccircle cx='52' cy='52' r='1.8' fill='%23f2c94c'/%3E%3C/svg%3E") center/contain no-repeat;animation:hop 1.4s ease-in-out infinite}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1.08,.9) rotate(-4deg)}50%{transform:translateY(-12px) scale(.94,1.08) rotate(4deg)}}
+button{transition:transform .15s}
+button:hover{transform:scale(1.06)}button:active{transform:scale(.95)}
+#preview{animation:pop .5s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
+.stat{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.stat b{display:block;font-family:"Bagel Fat One",ui-rounded,"Arial Rounded MT Bold",sans-serif;font-weight:400;font-size:clamp(1.15rem,5vw,1.5rem);overflow-wrap:break-word;line-height:1.15}
+@media (max-width:480px){.stat:last-child{flex:1 1 100%}}
+.stat span{color:var(--soft);font-size:.85rem}
+button.alt{background:none;border:1px solid var(--grass);margin-top:10px}
+:root:root button.alt{color:var(--grass)}
+:root:root button.clear{color:var(--soft)}
+figure{position:relative}
+figure img{cursor:zoom-in}
+button.del{position:absolute;top:8px;right:8px;width:30px;height:30px;padding:0;margin:0;border-radius:50%;background:rgba(0,0,0,.6);font-size:1.1rem;line-height:1}
+:root:root button.del{color:#fff}
+#lb{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:50;background:rgba(5,15,8,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:6px;animation:pop .25s both}
+#lb[hidden]{display:none}
+#lb img{max-width:100%;max-height:78vh;border-radius:12px}
+#gate{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:28px 20px;text-align:center}
+#gate h2{margin:0 0 6px;font-size:1.6rem}
+#gate p{color:var(--soft);margin:6px auto 0;max-width:30em}
+#gate a.btn{display:inline-block;background:var(--grass);font-weight:bold;border-radius:999px;padding:12px 26px;margin-top:16px;text-decoration:none}
+:root:root #gate a.btn{color:#fff}
+:root[data-theme="dark"] #gate a.btn{color:#0f1c12}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #gate a.btn{color:#0f1c12}}
+body.in #gate{display:none}
+body:not(.in) .app{display:none}
+#who{margin:0 0 14px}
+.meter{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.mhead{display:flex;justify-content:space-between;gap:8px;font-size:.95rem;margin-bottom:8px}
+.mhead span{color:var(--soft)}
+.track{height:20px;border-radius:999px;background:var(--line);overflow:hidden}
+.fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#7ed957,#c5f27a);transition:width 1s cubic-bezier(.3,1.2,.5,1);position:relative;overflow:hidden}
+.fill::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);background-size:200% 100%;animation:shine 2.4s linear infinite}
+@keyframes shine{from{background-position:200% 0}to{background-position:-200% 0}}
+.ticks{display:flex;justify-content:space-between;margin-top:6px;font-size:.78rem;color:var(--soft)}
+#namebox{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px;margin-bottom:18px}
+#namebox h2{margin:0 0 4px;font-size:1.5rem}
+#namebox p{margin:0 0 8px;color:var(--soft)}
+#namebox p#nameMsg{color:var(--err);min-height:1.2em;margin:6px 0 0}
+body:not(.named) .game{display:none}
+#sky{position:absolute;top:0;left:0;right:0;height:260px;overflow:hidden;pointer-events:none;z-index:0}
+#cam{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.camlabel{display:inline-block;margin-top:10px;border:1px solid var(--grass);border-radius:999px;padding:12px 26px;font-weight:bold;cursor:pointer;color:var(--grass);-webkit-tap-highlight-color:transparent}
+.camlabel:active{transform:scale(.95)}
+#cam:focus-visible+.camlabel{outline:3px solid var(--sun);outline-offset:2px}
+.brand{display:flex;align-items:center;gap:10px;margin:0 0 10px;position:relative;z-index:1}
+.brand svg{width:68px;height:68px;flex:none;overflow:visible}
+.brand .wm{font-family:"Bagel Fat One",ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",sans-serif;font-size:clamp(1.1rem,5.6vw,1.65rem);line-height:1;color:var(--ink);overflow-wrap:anywhere;text-shadow:0 2px 0 rgba(47,143,58,.35)}
+.brand .wm span{color:var(--grass)}
+.brand .sw{transform-box:fill-box;transform-origin:50% 100%;animation:blade 2.6s ease-in-out infinite}
+.brand .sw:nth-of-type(2n){animation-delay:-.8s}
+.screen[hidden]{display:none}
+#gate input[type=email],#gate input[type=password]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);margin-top:4px}
+#gate label.f{display:block;text-align:left;max-width:340px;margin:12px auto 0}
+.authbtn{display:block;width:100%;max-width:340px;margin:12px auto 0}
+#gate button.linkbtn{background:none;border:0;text-decoration:underline;font-weight:normal;margin-top:8px;padding:8px}
+:root:root #gate button.linkbtn{color:var(--soft)}
+#googleBtn{background:#fff;border:1px solid #dadce0}
+:root:root #gate button#googleBtn{color:#1f1f1f}
+#gate p.amsg{color:var(--err);min-height:1.3em;margin-top:8px}
+.clear{background:none;color:var(--soft);border:1px solid var(--line);padding:6px 14px;margin:0;font-weight:normal;font-size:.85rem}
+</style>
+</head>
+<body>
+<div id="sky" aria-hidden="true"><div class="sun"></div><div class="cloud"></div><div class="cloud c2"></div></div>
+<main>
+<header class="brand"><svg viewBox="0 0 64 64" role="img" aria-label="GrassToucherCounter logo: a character touching grass"><g stroke-linecap="round" stroke-linejoin="round"><path d="M40 40L46 55" stroke="#14301c" stroke-width="11" fill="none"/><path d="M40 40L46 55" stroke="#3b6fb6" stroke-width="7" fill="none"/><path d="M38 41L32 55" stroke="#14301c" stroke-width="11" fill="none"/><path d="M38 41L32 55" stroke="#3b6fb6" stroke-width="7" fill="none"/><path d="M25 28Q35 30 40 41" stroke="#14301c" stroke-width="15" fill="none"/><path d="M25 28Q35 30 40 41" stroke="#f2994a" stroke-width="11" fill="none"/><path d="M27 31Q22 40 19 49" stroke="#14301c" stroke-width="9" fill="none"/><path d="M27 31Q22 40 19 49" stroke="#ffd9a0" stroke-width="5" fill="none"/><circle cx="19" cy="50" r="4.5" fill="#ffd9a0" stroke="#14301c" stroke-width="2.5"/><circle cx="24" cy="21" r="8.5" fill="#ffd9a0" stroke="#14301c" stroke-width="3"/><path d="M15.8 19.5Q18 10.5 27 12.5Q32 14 32.4 19.5Q26 14.5 15.8 19.5Z" fill="#5a3a22" stroke="#14301c" stroke-width="2.5"/><path class="sw" d="M3 63L6 49L10 63Z" fill="#62c84f" stroke="#14301c" stroke-width="2"/><path class="sw" d="M9 63L13 45L17 63Z" fill="#89e06a" stroke="#14301c" stroke-width="2"/><path class="sw" d="M16 63L19 52L23 63Z" fill="#62c84f" stroke="#14301c" stroke-width="2"/><path class="sw" d="M22 63L26 46L30 63Z" fill="#89e06a" stroke="#14301c" stroke-width="2"/><path class="sw" d="M29 63L32 50L36 63Z" fill="#62c84f" stroke="#14301c" stroke-width="2"/><path class="sw" d="M36 63L40 52L44 63Z" fill="#89e06a" stroke="#14301c" stroke-width="2"/><path class="sw" d="M43 63L47 49L51 63Z" fill="#62c84f" stroke="#14301c" stroke-width="2"/><path class="sw" d="M50 63L53 53L57 63Z" fill="#89e06a" stroke="#14301c" stroke-width="2"/></g><g stroke="#f2c94c" stroke-width="2.5" stroke-linecap="round"><path d="M9 38L12 40M13 32L15 35M5 44L8 44"/></g></svg><div class="wm">GrassToucher<span>Counter</span></div></header>
+<h1 aria-label="Touch grass"><span>Touch</span> <span>grass</span></h1>
+<p class="lede">Go outside. Put a hand on real grass. Upload a photo as proof and it joins the lawn below.</p>
+
+<section id="gate">
+<div class="screen" id="s-loading"><h2 id="loadT">Checking your sign-in</h2><p>One moment.</p></div>
+<div class="screen" id="s-welcome" hidden><h2>Welcome</h2><p>Sign in to save your grass photos and see your progress.</p><button id="signinBtn" type="button">Sign in</button><p class="amsg" id="setupMsg" role="status" hidden></p></div>
+<div class="screen" id="s-choice" hidden><h2>How do you want to sign in?</h2><button class="authbtn" id="googleBtn" type="button">Sign in with Google</button><button class="authbtn" id="emailBtn" type="button">Sign in with email</button><p class="amsg" id="choiceMsg" role="status"></p><button class="linkbtn" id="backChoice" type="button">Back</button></div>
+<div class="screen" id="s-email" hidden><h2 id="emailTitle">Sign in with email</h2><label class="f">Email<input type="email" id="emailIn" autocomplete="email" inputmode="email" placeholder="you@example.com"></label><label class="f">Password<input type="password" id="passIn" autocomplete="current-password" placeholder="At least 6 characters"></label><button id="emailGo" type="button">Sign in</button><p class="amsg" id="emailMsg" role="status"></p><button class="linkbtn" id="toggleMode" type="button">New here? Create an account</button><button class="linkbtn" id="backEmail" type="button">Back</button></div>
+</section>
+<div class="app">
+<p class="lede" id="who"></p>
+<button class="alt" id="rename" type="button" hidden>Change name</button> <button class="alt" id="signout" type="button">Sign out</button>
+<div id="namebox" hidden><h2>Pick your name</h2><p>This is how you'll show up on your lawn.</p><input type="text" id="nameIn" maxlength="20" placeholder="Your name"><button id="nameBtn" type="button">Save name</button><p id="nameMsg" role="status"></p></div>
+<div class="game">
+<label class="drop" id="drop">
+<input type="file" id="file" accept="image/*">
+<b>Add your grass photo</b>
+<small>Tap to choose or drop an image here</small>
+</label>
+<input type="file" id="cam" accept="image/*">
+<label class="camlabel" for="cam" id="camb">Take or choose a photo</label>
+
+<div id="preview"><img id="pimg" alt="Preview of your photo">
+<label class="f">Where was it? (optional)<input type="text" id="where" maxlength="40" placeholder="Backyard, park, soccer field"></label>
+<button id="submit">Post my grass</button></div>
+<p id="msg" role="status"></p>
+
+<div class="stats" id="stats"></div>
+<div class="meter" id="meter"></div>
+<div class="count"><h2 id="n">The lawn</h2><button class="clear" id="clear" hidden>Clear lawn</button></div>
+<div class="grid" id="grid"></div>
+<p class="empty" id="empty">No grass touched yet. Be the first.</p>
+</div></div>
+</main>
+<div id="lb" hidden><img id="lbi" alt="Grass photo, enlarged"><button id="lbx" type="button">Close</button></div>
+<div id="lawn" aria-hidden="true"></div>
+<script type="module">
+import B from "./backend.js";
+(function(){
+var KEY="touchgrass:v1",items=[],cur=null;
+var $=function(i){return document.getElementById(i)};
+items=[];
+function save(){}
+function render(){
+ var g=$("grid");g.innerHTML="";
+ items.slice().reverse().forEach(function(it,i){
+  var f=document.createElement("figure"),im=document.createElement("img"),c=document.createElement("figcaption");
+  im.src=it.src;im.alt="Grass touched"+(it.where?" at "+it.where:"");
+  c.textContent=it.where||"Somewhere green";
+  var em=document.createElement("em");em.textContent=new Date(it.t).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  c.appendChild(em);f.style.animationDelay=Math.min(i,12)*70+"ms";f.appendChild(im);f.appendChild(c);var x=document.createElement("button");x.className="del";x.type="button";x.textContent="×";x.setAttribute("aria-label","Remove photo");x.onclick=function(e){e.stopPropagation();remove(it)};f.appendChild(x);im.onclick=function(){$("lbi").src=it.src;$("lb").hidden=false};g.appendChild(f);
+ });
+ $("empty").style.display=items.length?"none":"block";
+ $("clear").hidden=!items.length;stats();
+ $("n").textContent=items.length?("The lawn: "+items.length+" touch"+(items.length>1?"es":"")):"The lawn";
+}
+function shrink(file,cb){
+ var r=new FileReader();
+ r.onload=function(){var img=new Image();img.onload=function(){
+  var s=Math.min(1,800/Math.max(img.width,img.height)),c=document.createElement("canvas");
+  c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+  c.getContext("2d").drawImage(img,0,0,c.width,c.height);var q=.72,d=c.toDataURL("image/jpeg",q);while(d.length>220000&&q>.3){q-=.1;d=c.toDataURL("image/jpeg",q)}cb(d);
+ };img.onerror=function(){$("msg").textContent="That file isn't a readable image. Try a JPG or PNG."};img.src=r.result};
+ r.readAsDataURL(file);
+}
+function pick(file){
+ $("msg").textContent="";
+ if(!file||file.type.indexOf("image/")!==0){$("msg").textContent="Choose an image file.";return}
+ shrink(file,function(d){cur=d;$("pimg").src=d;$("preview").style.display="block"});
+}
+$("file").addEventListener("change",function(e){pick(e.target.files[0])});
+var dz=$("drop");
+["dragenter","dragover"].forEach(function(n){dz.addEventListener(n,function(e){e.preventDefault();dz.classList.add("over")})});
+["dragleave","drop"].forEach(function(n){dz.addEventListener(n,function(e){e.preventDefault();dz.classList.remove("over")})});
+dz.addEventListener("drop",function(e){pick(e.dataTransfer.files[0])});
+$("submit").addEventListener("click",function(){
+ if(!cur)return;
+ post({src:cur,where:$("where").value.trim(),t:Date.now()});
+ cur=null;$("file").value="";$("cam").value="";$("where").value="";$("preview").style.display="none";
+ $("msg").style.color="var(--grass)";$("msg").textContent="Posted. Nice work, you touched grass.";burst();
+});
+$("clear").addEventListener("click",function(){items.slice().forEach(remove)});
+render();
+function stats(){
+ var days={};function k(d){return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate()}
+ items.forEach(function(it){days[k(new Date(it.t))]=1});
+ var d=new Date(),s=0;if(!days[k(d)])d.setDate(d.getDate()-1);
+ while(days[k(d)]){s++;d.setDate(d.getDate()-1)}
+ var n=items.length,rank=n===0?"Pavement dweller":n<3?"Sprout":n<7?"Meadow regular":n<15?"Lawn legend":"Greenskeeper";
+ var rows=[[n,"grass touches"],[s+(s===1?" day":" days"),"streak"],[rank,"your rank"]];
+ var el=$("stats");el.innerHTML="";
+ rows.forEach(function(r){var c=document.createElement("div");c.className="stat";var b=document.createElement("b");b.textContent=r[0];var sp=document.createElement("span");sp.textContent=r[1];c.appendChild(b);c.appendChild(sp);el.appendChild(c)});
+ var goals=[3,7,14,30,60,100],next=100;
+ for(var gi=0;gi<goals.length;gi++){if(goals[gi]>s){next=goals[gi];break}}
+ var m=$("meter");m.innerHTML="";
+ var h=document.createElement("div");h.className="mhead";
+ var l=document.createElement("b");l.textContent=s?s+(s===1?"-day streak":"-day streak"):"No streak yet";
+ var rr=document.createElement("span");rr.textContent=s?(s>=100?"Max streak!":(next-s)+" more to reach "+next):"Touch grass today to start";
+ h.appendChild(l);h.appendChild(rr);
+ var tr=document.createElement("div");tr.className="track";tr.setAttribute("role","progressbar");tr.setAttribute("aria-label","Streak progress");tr.setAttribute("aria-valuenow",s);tr.setAttribute("aria-valuemax",next);
+ var fl=document.createElement("div");fl.className="fill";tr.appendChild(fl);
+ var tk=document.createElement("div");tk.className="ticks";
+ var t0=document.createElement("span");t0.textContent="0";var t1=document.createElement("span");t1.textContent=next+" days";
+ tk.appendChild(t0);tk.appendChild(t1);
+ m.appendChild(h);m.appendChild(tr);m.appendChild(tk);
+ setTimeout(function(){fl.style.width=Math.min(100,s/next*100)+"%"},60);
+}
+stats();
+
+$("cam").addEventListener("change",function(e){pick(e.target.files[0])});
+var uid=null,unsub=null,editing=false,myName="",emailMode="in",bootT=null;
+var ERR={"auth/email-already-in-use":"That email already has an account. Try signing in instead.","auth/invalid-credential":"That email or password isn't right.","auth/wrong-password":"That email or password isn't right.","auth/user-not-found":"That email or password isn't right.","auth/weak-password":"Your password needs at least 6 characters.","auth/invalid-email":"That email doesn't look right.","auth/missing-password":"Type a password.","auth/popup-closed-by-user":"The Google window was closed before you finished. Try again.","auth/cancelled-popup-request":"The Google window was closed before you finished. Try again.","auth/network-request-failed":"No connection. Check your internet and try again.","auth/too-many-requests":"Too many tries. Wait a minute and try again.","app/not-configured":"Sign-in isn't set up yet. See README.md."};
+function friendly(e){return ERR[e&&e.code]||"Something went wrong. Please try again."}
+function show(id){["s-loading","s-welcome","s-choice","s-email"].forEach(function(x){$(x).hidden=(x!==id)})}
+function post(o){
+ if(!uid){$("msg").textContent="Sign in first.";return}
+ B.addPhoto(uid,o).catch(function(){$("msg").style.color="var(--err)";$("msg").textContent="Couldn't save that photo. Try again."});
+}
+function remove(it){if(uid)B.deletePhoto(uid,it.id).catch(function(){$("msg").textContent="Couldn't remove that photo."})}
+function setName(n){
+ myName=n||"";
+ $("namebox").hidden=!(!myName||editing);
+ document.body.classList.toggle("named",!!myName);
+ $("rename").hidden=!myName||editing;
+ $("who").textContent=myName?"Welcome, "+myName+". Your lawn is only visible to you.":"Almost there. Pick a name for your lawn.";
+ if(myName){try{localStorage.setItem("tg:name",myName)}catch(e){}}
+}
+function enter(user){
+ var mine=user.uid;uid=mine;
+ try{localStorage.setItem("tg:seen","1")}catch(e){}
+ if(!$("nameIn").value)$("nameIn").value=user.displayName||"";
+ B.getProfile(mine).then(function(pf){
+  if(uid!==mine)return;
+  setName(pf&&pf.name);
+  document.body.classList.add("in");render();
+  if(unsub)unsub();
+  unsub=B.subscribePhotos(mine,function(list){
+   if(uid!==mine)return;
+   items=list.filter(function(x){return x.src}).sort(function(a,b){return a.t-b.t});render();
+  },function(){$("msg").textContent="Couldn't load your photos. Reload the page."});
+ }).catch(function(){show("s-welcome");$("setupMsg").textContent="We couldn't load your account. Check your connection and reload.";$("setupMsg").hidden=false});
+}
+function leave(){
+ uid=null;if(unsub){unsub();unsub=null}
+ items=[];editing=false;myName="";
+ document.body.classList.remove("in","named");
+ try{localStorage.removeItem("tg:name")}catch(e){}
+ $("nameIn").value="";$("emailIn").value="";$("passIn").value="";$("emailMsg").textContent="";$("choiceMsg").textContent="";
+ render();show("s-welcome");
+}
+function setMode(m){
+ emailMode=m;
+ $("emailTitle").textContent=m==="up"?"Create your account":"Sign in with email";
+ $("emailGo").textContent=m==="up"?"Create account":"Sign in";
+ $("toggleMode").textContent=m==="up"?"Already have an account? Sign in":"New here? Create an account";
+ $("passIn").autocomplete=m==="up"?"new-password":"current-password";
+ $("emailMsg").textContent="";
+}
+$("signinBtn").addEventListener("click",function(){show("s-choice")});
+$("backChoice").addEventListener("click",function(){show("s-welcome")});
+$("backEmail").addEventListener("click",function(){show("s-choice")});
+$("emailBtn").addEventListener("click",function(){var seen=false;try{seen=!!localStorage.getItem("tg:seen")}catch(e){}setMode(seen?"in":"up");show("s-email")});
+$("toggleMode").addEventListener("click",function(){setMode(emailMode==="up"?"in":"up")});
+$("googleBtn").addEventListener("click",function(){
+ var b=$("googleBtn"),m=$("choiceMsg");m.textContent="";b.disabled=true;
+ Promise.resolve().then(function(){return B.signInGoogle()}).catch(function(e){m.textContent=friendly(e)}).then(function(){b.disabled=false});
+});
+$("emailGo").addEventListener("click",function(){
+ var em=$("emailIn").value.trim(),pw=$("passIn").value,m=$("emailMsg"),b=$("emailGo");
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){m.textContent=ERR["auth/invalid-email"];return}
+ if(pw.length<6){m.textContent=ERR["auth/weak-password"];return}
+ m.textContent="";b.disabled=true;
+ Promise.resolve().then(function(){return emailMode==="up"?B.signUpEmail(em,pw):B.signInEmail(em,pw)}).catch(function(e){m.textContent=friendly(e)}).then(function(){b.disabled=false});
+});
+["emailIn","passIn"].forEach(function(i){$(i).addEventListener("keydown",function(e){if(e.key==="Enter")$("emailGo").click()})});
+$("signout").addEventListener("click",function(){B.signOut()});
+$("nameBtn").addEventListener("click",function(){
+ var v=$("nameIn").value.trim().slice(0,20);
+ if(!v){$("nameMsg").textContent="Type a name first.";return}
+ if(!uid)return;
+ $("nameMsg").textContent="";
+ B.setProfile(uid,{name:v}).then(function(){editing=false;setName(v)}).catch(function(){$("nameMsg").textContent="Couldn't save your name. Try again."});
+});
+$("rename").addEventListener("click",function(){editing=true;$("nameIn").value=myName;setName(myName)});
+try{var cn=localStorage.getItem("tg:name");if(cn)$("loadT").textContent="Welcome back, "+cn}catch(e){}
+if(B.configured===false){$("setupMsg").textContent="This site isn't connected to a sign-in service yet. Open README.md to set it up.";$("setupMsg").hidden=false}
+bootT=setTimeout(function(){if(!$("s-loading").hidden){show("s-welcome");$("setupMsg").textContent="We couldn't reach the sign-in service. Check your connection and reload.";$("setupMsg").hidden=false}},10000);
+B.onAuth(function(user){clearTimeout(bootT);if(user)enter(user);else leave()});
+function closeLb(){$("lb").hidden=true}
+$("lbx").addEventListener("click",closeLb);
+$("lb").addEventListener("click",function(e){if(e.target===this)closeLb()});
+addEventListener("keydown",function(e){if(e.key==="Escape")closeLb()});
+var lawn=$("lawn"),blades=[],reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
+function build(){
+ lawn.innerHTML="";blades=[];
+ var n=Math.ceil(innerWidth/5);
+ for(var i=0;i<n;i++){
+  var b=document.createElement("i");b.className="b";
+  b.style.setProperty("--h",(35+Math.random()*70)+"px");
+  b.style.setProperty("--d",(2.2+Math.random()*2.5)+"s");
+  b.style.setProperty("--dl",(-Math.random()*4)+"s");
+  b.style.setProperty("--c","hsl("+(85+Math.random()*30)+",70%,"+(55+Math.random()*20)+"%)");
+  lawn.appendChild(b);blades.push(b);
+ }
+}
+build();
+var rt;addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){build();layout()},200)});
+var S=[],raf=0,last=0,lx=null,lt=0,KC=2.5e-5;
+function layout(){
+ S=blades.map(function(b){
+  var h=parseFloat(b.style.getPropertyValue("--h"))||60,r=.85+Math.random()*.3;
+  var k=1.3e-4*r*r*(1+(70-h)/260);
+  return{el:b,x:b.offsetLeft+b.offsetWidth/2,h:h,a:0,v:0,k:k,c:2*.2*Math.sqrt(k)};
+ });
+}
+function tick(now){
+ var dt=Math.min(32,now-last),moving=false,n=S.length;last=now;
+ for(var i=0;i<n;i++){
+  var s=S[i],l=i?S[i-1].a:s.a,r=i<n-1?S[i+1].a:s.a;
+  s.v+=(-s.k*s.a-s.c*s.v+KC*(l+r-2*s.a))*dt;
+  s.a+=s.v*dt;
+  if(s.a>50){s.a=50;s.v*=.5}else if(s.a<-50){s.a=-50;s.v*=.5}
+  if(Math.abs(s.a)>.05||Math.abs(s.v)>.0006){moving=true;s.el.style.rotate=s.a.toFixed(2)+"deg"}
+  else if(s.a!==0||s.el.style.rotate){s.a=0;s.v=0;s.el.style.rotate=""}
+ }
+ raf=moving?requestAnimationFrame(tick):0;
+}
+function kick(){if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}}
+function hit(x,y,vx){
+ if(reduce||y<innerHeight-150)return;
+ vx=Math.max(-4,Math.min(4,vx));
+ var R=80;
+ for(var i=0;i<S.length;i++){
+  var ad=Math.abs(S[i].x-x);
+  if(ad<R){
+   var f=.5+.5*Math.cos(Math.PI*ad/R);
+   S[i].v=Math.max(-1,Math.min(1,S[i].v+vx*.14*f*(.6+S[i].h/110)));
+  }
+ }
+ kick();
+}
+function onMove(x,y){
+ var t=performance.now();
+ if(lx!==null)hit(x,y,(x-lx)/Math.max(4,t-lt));
+ lx=x;lt=t;
+}
+function wave(){
+ if(reduce)return;
+ S.forEach(function(s,i){setTimeout(function(){s.v+=.32;kick()},i*6)});
+}
+addEventListener("pointermove",function(e){if(e.pointerType!=="touch")onMove(e.clientX,e.clientY)});
+addEventListener("touchstart",function(e){var t=e.touches[0];lx=null;if(t)onMove(t.clientX,t.clientY)},{passive:true});
+addEventListener("touchmove",function(e){var t=e.touches[0];if(t)onMove(t.clientX,t.clientY)},{passive:true});
+addEventListener("touchend",function(){lx=null},{passive:true});
+addEventListener("pointerup",function(){lx=null});
+layout();
+function burst(){
+ if(reduce)return;
+ wave();
+ for(var i=0;i<46;i++){
+  var p=document.createElement("i");p.className="p";
+  p.style.left=(Math.random()*100)+"vw";
+  p.style.setProperty("--x",(Math.random()*160-80)+"px");
+  p.style.setProperty("--y",-(200+Math.random()*(innerHeight*.6))+"px");
+  p.style.setProperty("--r",(Math.random()*720-360)+"deg");
+  p.style.setProperty("--t",(1+Math.random()*1.2)+"s");
+  document.body.appendChild(p);
+  (function(el){setTimeout(function(){el.remove()},2400)})(p);
+ }
+}
+})();
+</script>
+</body>
+</html>
